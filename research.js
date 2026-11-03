@@ -214,23 +214,23 @@ function blip() {
   editTimers.push(setTimeout(() => cell.classList.remove('blip'), 1600));
 }
 
-/* Above the sequence: a scientist and an AI model design a molecule together,
+/* Above the sequence: a scientist and an AI design a molecule together,
    in several rounds on one hand-drawn sketch. The DNA row below is the
    molecule's code, and every unit of the drawing owns its own letters there:
    one per base pair of DNA, one per nucleotide of RNA, three (a codon) per
    amino acid of a protein. Changes (coral) land on exactly those letters. A
    changed RNA base pair changes both partners, so the stem stays paired
    (covariation) and its two letters sit far apart, mirrored around the loop.
-   research.html?cowork=dogma cycles through DNA, RNA and protein. */
+   It cycles through DNA, RNA and protein; research.html?cowork=rna shows RNA only. */
 
-const MODE = new URLSearchParams(location.search).get('cowork') === 'dogma' ? 'dogma' : 'rna';
+const MODE = new URLSearchParams(location.search).get('cowork') === 'rna' ? 'rna' : 'dogma';
 const ORDER = MODE === 'dogma' ? ['dna', 'rna', 'protein'] : ['rna'];
 const zh = document.documentElement.lang.startsWith('zh');
 const W = 640, H = 226;
 const coSvg = svg('svg', {class:'cowork', 'aria-hidden':'true'});
 panels.redesign.appendChild(coSvg);
 const scene = svg('g', {}, coSvg);
-// One bust, facing right; the AI model is the same figure mirrored and drawn in dots.
+// One bust, facing right; the AI is the same figure mirrored and drawn in dots.
 const BUST = 'M58 170C62 142 80 126 98 119C91 105 86 89 88 72C90 53 104 42 120 44C134 46 141 56 140 67L146 78L139 80C140 83 139 86 137 88C138 92 136 96 130 98C126 99 122 101 121 106L122 117C137 121 153 131 163 152';
 const SHIFT = 85;
 const human = svg('g', {class:'co-human'}, scene);
@@ -244,9 +244,9 @@ NODES.forEach((a, i) => NODES.slice(i + 1).forEach(b => {
   if (Math.hypot(a[0] - b[0], a[1] - b[1]) < 19) svg('line', {x1:a[0], y1:a[1], x2:b[0], y2:b[1], 'data-w':.8}, net);
 }));
 const nodes = NODES.map(([x, y]) => svg('circle', {cx:x, cy:y, r:1.9}, net));
-const label = (x, text) => { svg('text', {class:'co-label', x, y:220}, scene).textContent = text; };
+const label = (x, text) => { svg('text', {class:'co-label', x, y:202}, scene).textContent = text; };
 label(195, zh ? '科学家' : 'SCIENTIST');
-label(W - 195, zh ? 'AI 模型' : 'AI MODEL');
+label(W - 195, 'AI');
 
 const design = svg('g', {}, scene);
 const sketchG = svg('g', {}, design), marksG = svg('g', {}, design);
@@ -464,7 +464,8 @@ function newCycle(n) {
     return {pts, t, segs:cuts.map(([i0, i1]) => ({i0, i1, el:svg('path', {class:'co-sketch', pathLength:1, 'data-w':1.5, d:toD(pts.slice(i0, i1 + 1))}, sketchG)}))};
   });
   fixEl = svg('path', {class:'co-sketch', pathLength:1, 'data-w':1.5, d:toD(D.fix.pts)}, sketchG);
-  const checkPts = wobble([[268, 98], [271, 101], [274, 105], [278, 99], [282, 93], [286, 87]], .5);
+  // Above the resting elbow (about y 97), so the arm never covers the tick once it is back.
+  const checkPts = wobble([[268, 82], [271, 85], [274, 89], [278, 83], [282, 77], [286, 71]], .5);
   check.setAttribute('d', toD(checkPts));
 
   // Marks and the changes made to them.
