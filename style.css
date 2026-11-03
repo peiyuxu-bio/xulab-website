@@ -279,8 +279,8 @@ span[lang=zh]{white-space:nowrap}
 :focus-visible{outline:2px solid #cf6a55;outline-offset:4px}
 input:focus-visible{outline:none}
 @media(min-width:901px){
-  header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.9);-webkit-backdrop-filter:saturate(1.4) blur(14px);backdrop-filter:saturate(1.4) blur(14px);box-shadow:0 0 0 100vmax rgba(255,255,255,.9);clip-path:inset(0 -100vmax);transition:height .35s ease}
-  header.is-scrolled{height:72px;box-shadow:0 0 0 100vmax rgba(255,255,255,.9),0 1px 0 100vmax #e8ecee}
+  header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.9);-webkit-backdrop-filter:saturate(1.4) blur(14px);backdrop-filter:saturate(1.4) blur(14px);box-shadow:0 0 0 100vmax rgba(255,255,255,.9);clip-path:inset(0 -100vmax);margin-bottom:0;transition:height .35s ease,margin-bottom .35s ease}
+  header.is-scrolled{height:72px;margin-bottom:56px;box-shadow:0 0 0 100vmax rgba(255,255,255,.9),0 1px 0 100vmax #e8ecee}
   header .wordmark{transition:font-size .35s ease}
   header.is-scrolled .wordmark{font-size:21px}
 }
