@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#ffffff"><meta name="description" content="发现、解析、重塑：我们在生命之树中寻找新的 RNA 引导系统，揭示其机制，并将其改造为可编程工具。"><title>研究方向 — 徐沛雨实验室</title><meta property="og:locale" content="zh_CN"><meta property="og:type" content="website"><meta property="og:site_name" content="Xu Lab"><meta property="og:title" content="研究方向 — 徐沛雨实验室"><meta property="og:description" content="发现、解析、重塑：我们在生命之树中寻找新的 RNA 引导系统，揭示其机制，并将其改造为可编程工具。"><meta property="og:image" content="../assets/og-image.png"><meta name="twitter:card" content="summary_large_image"><link rel="alternate" hreflang="en" href="../research.html"><link rel="alternate" hreflang="zh-CN" href="research.html"><link rel="icon" href="../assets/mark.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png"><link rel="manifest" href="../site.webmanifest"><link rel="stylesheet" href="../style.css?v=r37"><script type="module" src="../site.js?v=r5"></script><script type="module" src="../research.js?v=research-26"></script><script type="module" src="../app.js?v=spufz1-v5"></script></head>
+<body class="research"><a class="skip" href="#main">跳到正文</a><header><a class="wordmark" href="index.html" aria-label="徐沛雨实验室首页">Xu Lab<span>.</span></a><nav aria-label="主导航"><a href="research.html" aria-current="page">研究</a><a href="team.html">团队</a><a href="publications.html">论文</a><a href="contact.html">联系</a><a class="lang-switch" href="../research.html" hreflang="en" lang="en">EN</a></nav></header>
+<main id="main"><div class="research-stage">
+    <div class="page-heading is-label"><h1>研究方向<span>.</span></h1><p>实验与 AI 并重，<br>发现、读懂、改写分子机器。</p></div>
+    <div class="pillars" role="tablist" aria-label="研究主题" aria-orientation="vertical">
+      <button class="pillar" role="tab" id="tab-discover" aria-controls="panel-discover" aria-selected="true" data-panel="discover" aria-labelledby="name-discover" aria-describedby="more-discover"><span class="pillar-num">01</span><span class="pillar-name" id="name-discover">发现<span>.</span></span><span class="pillar-more" id="more-discover"><span><span class="pillar-q">自然界里还藏着什么？</span><span class="pillar-lead">自然界的分子工具箱，绝大部分尚待探索。我们在细菌、古菌、病毒和真核生物的基因组与宏基因组中，搜寻前人未曾触及的分子系统。这样的搜寻已经有了收获：真核生物基因组编码的 Fanzor 蛋白，被证实是 RNA 引导的核酸内切酶；TIGR-Tas 也由此浮出水面——原核生物及其病毒中一类模块化的 RNA 引导 DNA 靶向系统。</span></span></span></button>
+      <button class="pillar" role="tab" id="tab-decode" aria-controls="panel-decode" aria-selected="false" tabindex="-1" data-panel="decode" aria-labelledby="name-decode" aria-describedby="more-decode"><span class="pillar-num">02</span><span class="pillar-name" id="name-decode">解析<span>.</span></span><span class="pillar-more" id="more-decode"><span><span class="pillar-q">它如何运作？又如何演化而来？</span><span class="pillar-lead">每发现一个新系统，我们都会追问：它有什么作用？如何识别靶标？从何而来？我们综合运用生物化学、细胞实验、结构生物学和演化分析来回答这些问题，从分子机制一直深入到生物学功能。</span></span></span></button>
+      <button class="pillar" role="tab" id="tab-redesign" aria-controls="panel-redesign" aria-selected="false" tabindex="-1" data-panel="redesign" aria-labelledby="name-redesign" aria-describedby="more-redesign"><span class="pillar-num">03</span><span class="pillar-name" id="name-redesign">重塑<span>.</span></span><span class="pillar-more" id="more-redesign"><span><span class="pillar-q">我们能用它造出什么？</span><span class="pillar-lead">理解机制，才能重建机器。我们把 AI 视为科研合作者：读懂蛋白质与 RNA「语言」的模型，帮助我们设计新的分子机器，预测它们在细胞中如何工作，并挑选最有价值的实验；实验则让模型始终脚踏实地。二者结合，缩短从自然发现到下一代疗法的距离。</span></span></span></button>
+    </div>
+  <div class="research-visual">
+    <section class="panel is-active" id="panel-discover" role="tabpanel" aria-labelledby="tab-discover">
+      <div class="panel-art"><svg id="tree" class="tree" viewBox="0 0 1000 800" preserveAspectRatio="xMidYMid slice" role="img" aria-label="示意性生命之树的一部分，分支末端是生物的线描图。"></svg></div>
+    </section>
+    <section class="panel" id="panel-decode" role="tabpanel" aria-labelledby="tab-decode" hidden>
+      <div class="panel-art decode-art">
+        <div id="viewport" class="molecular-viewport">
+          <canvas aria-label="放大的 SpuFz1 蛋白表面（半透明白色）、ωRNA（浅蓝色）与 DNA（珊瑚色与杏色），来自 PDB 8GKH，DNA 延伸段为建模所得。拖动可旋转。" role="img"></canvas>
+        </div>
+        <p id="status" class="molecular-status" role="status">正在加载结构…</p>
+      </div>
+      <p class="panel-caption" hidden><button id="motion" aria-pressed="false" disabled>暂停旋转</button></p>
+    </section>
+    <section class="panel" id="panel-redesign" role="tabpanel" aria-labelledby="tab-redesign" hidden>
+      <div class="panel-art"><div id="genome" class="genome" role="img" aria-label="科学家手绘一条向导 RNA 及其碱基对。经过几轮往复，AI 模型修改部分碱基对（总是同时改变配对的两个碱基，使茎区保持配对），科学家撤回其中一处并重画茎环。定稿后，每个被修改的核苷酸写入下方 DNA 序列中对应的位置。"></div></div>
+    </section>
+  </div>
+</div>
+</main>
+<footer class="site-footer"><div class="footer-inner"><div class="footer-id"><a class="footer-mark" href="index.html">Xu Lab<span>.</span></a><p>发掘与重塑分子机器</p></div><div class="footer-col"><p class="footer-label">联系</p><p><a href="mailto:peiyu.xu@hotmail.com">peiyu.xu@hotmail.com</a><br><a href="contact.html#positions">招聘信息</a></p></div><p class="footer-note">© 2026 徐沛雨实验室</p></div></footer></body></html>
