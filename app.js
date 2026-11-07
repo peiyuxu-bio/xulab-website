@@ -25,11 +25,14 @@ async function initialize() {
   const scene = new THREE.Scene();
   const camera = new THREE.OrthographicCamera(-100,100,100,-100,1,1200);
   camera.position.set(0,0,450);
-  scene.add(new THREE.HemisphereLight(0xffffff,0x9babb7,2.0));
+  const hemi = new THREE.HemisphereLight(0xffffff,0x9babb7,2.0);
+  scene.add(hemi);
   const key = new THREE.DirectionalLight(0xffffff,2.7);
   key.position.set(-120,180,250); scene.add(key);
   const fill = new THREE.DirectionalLight(0xdce7ed,1.1);
   fill.position.set(150,30,-80); scene.add(fill);
+  const under = new THREE.DirectionalLight(0xe5836e,0);
+  under.position.set(-40,-170,90); scene.add(under);
   const complex = new THREE.Group();
   scene.add(complex);
 
@@ -48,32 +51,53 @@ async function initialize() {
   geometry.setAttribute('position',new THREE.BufferAttribute(new Float32Array(binary,8,vertexCount*3),3));
   geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(binary,8+vertexCount*12,faceCount*3),1));
   geometry.computeVertexNormals();
+  const darkUniform = { value: 0.0 };
   const surfaceMaterial = new THREE.MeshPhongMaterial({
     color:0xf4f5f6, specular:0xffffff, shininess:65,
     transparent:true, opacity:opacity ? Number(opacity.value) : .42, depthWrite:false,
     side:THREE.FrontSide
   });
+  surfaceMaterial.onBeforeCompile = shader => {
+    shader.uniforms.uDarkMode = darkUniform;
+    shader.fragmentShader = shader.fragmentShader
+      .replace('#include <common>', '#include <common>\nuniform float uDarkMode;')
+      .replace(
+        '#include <opaque_fragment>',
+        `if (uDarkMode > 0.5) {
+          float viewCos = clamp(abs(normal.z), 0.0, 1.0);
+          float fresnel = pow(1.0 - viewCos, 1.55);
+          vec3 rimTint = vec3(0.68, 0.84, 0.96);
+          vec3 darkLight = outgoingLight * mix(0.88, 1.18, fresnel) + rimTint * (0.16 * fresnel);
+          float darkAlpha = clamp(diffuseColor.a * mix(0.48, 1.48, fresnel), 0.0, 0.88);
+          outgoingLight = mix(outgoingLight, darkLight, uDarkMode);
+          diffuseColor.a = mix(diffuseColor.a, darkAlpha, uDarkMode);
+        }
+        #include <opaque_fragment>`
+      );
+  };
   const surface = new THREE.Mesh(geometry,surfaceMaterial);
   surface.renderOrder = 5;
   complex.add(surface);
 
+  const paletteLight = {target:0xde7e6a,nonTarget:0xfabb95,rna:0x91adc1,dnaRung:0xe2ac97,hybridRung:0xc4b9af};
+  const paletteDark  = {target:0xe88872,nonTarget:0xfabb95,rna:0x9ec6dc,dnaRung:0xe2ac97,hybridRung:0xc4b9af};
   const materials = new Map();
-  function material(color) {
-    if (!materials.has(color)) materials.set(color,new THREE.MeshPhongMaterial({color,specular:0xffffff,shininess:60}));
-    return materials.get(color);
+  function material(role) {
+    if (!materials.has(role)) materials.set(role,new THREE.MeshPhongMaterial({color:paletteLight[role],specular:0xffffff,shininess:60}));
+    return materials.get(role);
   }
-  const colors = {target:0xde7e6a,nonTarget:0xfabb95,rna:0x91adc1};
+  const colors = {target:'target',nonTarget:'nonTarget',rna:'rna'};
   const point = p => new THREE.Vector3(...p);
-  function tube(points,radius,color) {
+  function tube(points,radius,role) {
     if (points.length<2) return;
     const curve = new THREE.CatmullRomCurve3(points.map(point),false,'centripetal');
-    const mesh = new THREE.Mesh(new THREE.TubeGeometry(curve,Math.max(16,points.length*6),radius,8,false),material(color));
+    const mesh = new THREE.Mesh(new THREE.TubeGeometry(curve,Math.max(16,points.length*6),radius,8,false),material(role));
     complex.add(mesh);
   }
   const rodGeometry = new THREE.CylinderGeometry(1,1,1,8);
-  function rods(pairs,radius,color) {
+  function rods(pairs,radius,role) {
     if (!pairs.length) return;
-    const mesh = new THREE.InstancedMesh(rodGeometry,material(color),pairs.length);
+    const mesh = new THREE.InstancedMesh(rodGeometry,material(role),pairs.length);
     const dummy = new THREE.Object3D(),up = new THREE.Vector3(0,1,0);
     pairs.forEach(([a,b],i) => {
       const start=point(a),end=point(b),delta=end.clone().sub(start);
@@ -116,20 +140,20 @@ async function initialize() {
     const r=rna.get(76-k),t=ts.get(k);
     if(r&&t) hybridPairs.push([r.base,t.base]);
   }
-  rods(dnaPairs,.26,0xe2ac97);rods(hybridPairs,.28,0xc4b9af);
+  rods(dnaPairs,.26,'dnaRung');rods(hybridPairs,.28,'hybridRung');
 
   const model=data.modeled;
-  for(const [key,name,n] of [['upperTarget','target',15],['upperNonTarget','nonTarget',-15]]) {
+  for(const [keyName,name,n] of [['upperTarget','target',15],['upperNonTarget','nonTarget',-15]]) {
     const source=data.chains[name].find(r=>r.residue===n);
-    if(name!=='target') tube([source.backbone,...model[key].map(r=>r.backbone)],.86,colors[name]);
-    rods(model[key].map(r=>[r.backbone,r.base]),.43,colors[name]);
+    if(name!=='target') tube([source.backbone,...model[keyName].map(r=>r.backbone)],.86,colors[name]);
+    rods(model[keyName].map(r=>[r.backbone,r.base]),.43,colors[name]);
   }
-  for(const [key,name] of [['lowerTarget','target'],['lowerNonTarget','nonTarget']]) {
-    const residues = name==='nonTarget' ? model[key].slice(data.reannealIndex) : model[key];
+  for(const [keyName,name] of [['lowerTarget','target'],['lowerNonTarget','nonTarget']]) {
+    const residues = name==='nonTarget' ? model[keyName].slice(data.reannealIndex) : model[keyName];
     rods(residues.flatMap(r=>[[r.backbone,r.sugar],[r.sugar,r.base]]),.43,colors[name]);
   }
-  rods(model.upperTarget.map((r,i)=>[r.base,model.upperNonTarget[i].base]),.26,0xe2ac97);
-  rods(model.lowerTarget.slice(data.reannealIndex).map((r,i)=>[r.base,model.lowerNonTarget[i+data.reannealIndex].base]),.26,0xe2ac97);
+  rods(model.upperTarget.map((r,i)=>[r.base,model.upperNonTarget[i].base]),.26,'dnaRung');
+  rods(model.lowerTarget.slice(data.reannealIndex).map((r,i)=>[r.base,model.lowerNonTarget[i+data.reannealIndex].base]),.26,'dnaRung');
   // Each single strand and the dense helical trace share one interpolated
   // backbone, so the junction has no separate end cap or tangent mismatch.
   tube([...model.displacedNonTarget.slice(0,-1),...model.lowerCurves.nonTarget],.80,colors.nonTarget);
@@ -158,6 +182,39 @@ async function initialize() {
   const radialExtent=Math.max(...['x','z'].map(k=>Math.max(Math.abs(box.min[k]-axisCenter[k]),Math.abs(box.max[k]-axisCenter[k]))));
 
   function render() { complex.rotation.y=angle;renderer.render(scene,camera); }
+  function applySceneTheme() {
+    const dark = document.documentElement.dataset.theme === 'dark';
+    darkUniform.value = dark ? 1.0 : 0.0;
+    renderer.setClearColor(dark ? 0x06131c : 0xffffff, 0);
+    hemi.color.setHex(dark ? 0xe4f0f8 : 0xffffff);
+    hemi.groundColor.setHex(dark ? 0x092234 : 0x9babb7);
+    hemi.intensity = dark ? 1.35 : 2.0;
+    key.color.setHex(dark ? 0xfff6f0 : 0xffffff);
+    key.intensity = dark ? 2.35 : 2.7;
+    key.position.set(...(dark ? [-125,185,245] : [-120,180,250]));
+    fill.color.setHex(dark ? 0x78b0d4 : 0xdce7ed);
+    fill.intensity = dark ? 1.5 : 1.1;
+    fill.position.set(...(dark ? [160,35,-110] : [150,30,-80]));
+    under.intensity = dark ? 0.45 : 0;
+    surfaceMaterial.color.setHex(dark ? 0xe6eff6 : 0xf4f5f6);
+    surfaceMaterial.emissive.setHex(dark ? 0x0b2233 : 0x000000);
+    surfaceMaterial.specular.setHex(dark ? 0xf4f9fc : 0xffffff);
+    surfaceMaterial.shininess = dark ? 82 : 65;
+    surfaceMaterial.opacity = opacity ? Number(opacity.value) : (dark ? .35 : .42);
+    surfaceMaterial.needsUpdate = true;
+    const pal = dark ? paletteDark : paletteLight;
+    for (const [role, mat] of materials.entries()) {
+      const hex = pal[role];
+      mat.color.setHex(hex);
+      mat.emissive.setHex(dark ? hex : 0x000000);
+      mat.emissiveIntensity = dark ? .18 : 0;
+      mat.shininess = dark ? 76 : 60;
+      mat.needsUpdate = true;
+    }
+    render();
+  }
+  applySceneTheme();
+  addEventListener('themechange', applySceneTheme);
   function fit() {
     const {width,height}=viewport.getBoundingClientRect();
     if(!width||!height)return;

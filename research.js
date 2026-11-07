@@ -124,12 +124,11 @@ function buildTree(root) {
       const [x0, y0] = pt(node.r, node.a), [x1, y1] = pt(node.r, c.a), [x2, y2] = pt(c.r, c.a);
       const sweep = c.a > node.a ? 1 : 0, large = Math.abs(c.a - node.a) > Math.PI ? 1 : 0;
       const path = svg('path', {
-        class:'edge', pathLength:1,
+        class: c.onPath ? 'edge on-path' : 'edge', pathLength:1,
         d:`M${f(x0)} ${f(y0)}A${f(node.r)} ${f(node.r)} 0 ${large} ${sweep} ${f(x1)} ${f(y1)}L${f(x2)} ${f(y2)}`,
         'stroke-width': Math.max(.7, 2.1 - c.depth * .09).toFixed(2),
-        'stroke-opacity': c.onPath ? 1 : Math.max(.28, .72 - c.depth * .025).toFixed(2)
+        'stroke-opacity': c.onPath ? 1 : Math.max(.31, .75 - c.depth * .024).toFixed(2)
       }, edges);
-      if (c.onPath) path.style.stroke = '#de7e6a';
       path.style.setProperty('--d', sec(c.start));
       path.style.setProperty('--t', sec(c.end - c.start));
       draw(c);
